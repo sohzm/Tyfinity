@@ -3,7 +3,10 @@
 #include <ncurses.h>
 #include <fstream>
 #include <string>
+#include <locale.h>
 #include <vector>
+
+#include "color.h"
 
 std::vector <std::string> VEC_WORDS(10000);
 
@@ -15,6 +18,7 @@ int main() {
 
     read_words();
     srand(time(0));
+    setlocale(LC_ALL, "");
 
     int yMax, xMax, typex, typey;
 
@@ -22,19 +26,22 @@ int main() {
     getmaxyx(stdscr, yMax, xMax);
 
     WINDOW * type_input_win = newwin(7, 47, yMax/2, (xMax-42)/2);
-    box(type_input_win, 0, 0);
+    //box(type_input_win, 0, 0);
     refresh();
     getbegyx(type_input_win, typey, typex);
 
     typey++; typex++;
-    int words_typed = 0;
+    int words_typed = 0, calc;
     long long total_time = 0;
+
+    mvwprintw(type_input_win, 3, 0, "%ls", L"┌─────────────────────────────────────────────┐");
+    mvwprintw(type_input_win, 4, 0, "%ls", L"│  >                                          │");
+    mvwprintw(type_input_win, 5, 0, "%ls", L"└─────────────────────────────────────────────┘");
 
     while (1) {
         std::string temp_word = pick_random_word();
         mvwprintw(type_input_win, 2, 4, "                                ");
         mvwprintw(type_input_win, 2, 4, " %s", temp_word.c_str());
-        mvwprintw(type_input_win, 4, 4, "                                ");
         wrefresh(type_input_win);
         move(typey+3, typex+4);
         refresh();
@@ -42,12 +49,11 @@ int main() {
         total_time += time/1000000;
         if (time) {
             words_typed++;
-            int calc = (words_typed*60)/total_time;
-            mvwprintw(type_input_win, 2, 40, "      ");
-            mvwprintw(type_input_win, 2, 36, "WPM %d", calc);
-            mvwprintw(type_input_win, 4, 40, "      ");
-            mvwprintw(type_input_win, 4, 36, "WRD %d", words_typed);
+            calc = (words_typed*60)/total_time;
         }
+        mvwprintw(type_input_win, 4, 0, "%ls", L"│  >                                          │");
+        mvwprintw(type_input_win, 2, 36, "WPM %d", calc);
+        mvwprintw(type_input_win, 4, 36, "WRD %d", words_typed);
     }
     endwin();
 }
@@ -69,13 +75,12 @@ int get_string(std::string str) {
     nocbreak();
     echo();
 
-    int ch = getch();
-    while (ch != '\n') {
-        input.push_back(ch);
-        ch = getch();
-    }
+    char hello[40];
+    scanw("%30s", hello);
+    input = std::string(hello);
+
     cbreak();
-    if (input == "quit") {
+    if (input == "!quit") {
         endwin();
         exit(0);
     }
