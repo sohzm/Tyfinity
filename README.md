@@ -18,6 +18,8 @@ Type most used words for no reason. Uses Ncurses.
 
 ## Run
 
+Note you need to have the words.txt in the same dir from where you're calling this binary, or you can change the location in the code itself accordingly. 
+
 `./bin/out`
 
 
